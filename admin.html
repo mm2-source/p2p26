@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>لوحة تحكم الإدارة التنفيذية</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/tronweb@latest/dist/TronWeb.js"></script>
+
+  <script src="firebase-config.js"></script>
+  <script src="admin.js" defer></script>
+
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background: #f4f7f6; }
+    h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-top: 40px; display: flex; align-items: center; gap: 10px; }
+    h2 .count-badge { background: #007bff; color: #fff; font-size: 13px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+    h2.completed { border-bottom-color: #28a745; }
+    h2.completed .count-badge { background: #28a745; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; }
+    th { background-color: #007bff; color: white; }
+    table.completed th { background-color: #28a745; }
+    button { padding: 8px 15px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+    .btn-withdraw { background: #28a745; color: white; }
+    .btn-release { background: #ffc107; color: #333; }
+    .btn-view { background: #17a2b8; color: white; padding: 6px 12px; font-size: 12px; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    button:hover:not(:disabled) { opacity: 0.8; }
+
+    .addr-cell { font-family: monospace; font-size: 12px; color: #555; }
+    .empty-row td { color: #888; font-style: italic; padding: 25px; }
+
+    .tag { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .tag-auto { background: #d4edda; color: #155724; }
+    .tag-admin { background: #fff3cd; color: #856404; }
+
+    /* Modal لعرض إثبات الدفع */
+    #proofModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+    #proofModal.show { display: flex; }
+    #proofModal img { max-width: 95%; max-height: 90vh; border-radius: 8px; }
+    #proofModal .close-btn { position: absolute; top: 20px; left: 20px; background: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h2>💰 سحب أرباح (إرسال USDT فعلي) <span class="count-badge" id="withdrawCount">0</span></h2>
+  <table id="withdrawTable">
+    <thead>
+      <tr>
+        <th>عنوان المحفظة</th>
+        <th>المبلغ</th>
+        <th>الإجراء</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>🔄 تحرير عملات يدوي (طلبات تحت المراجعة) <span class="count-badge" id="releaseCount">0</span></h2>
+  <table id="releaseTable">
+    <thead>
+      <tr>
+        <th>رقم الطلب</th>
+        <th>المبلغ (USDT)</th>
+        <th>الإجراء</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2 class="completed">✅ الطلبات المنفّذة <span class="count-badge" id="completedCount">0</span></h2>
+  <table id="completedTable" class="completed">
+    <thead>
+      <tr>
+        <th>رقم الطلب</th>
+        <th>البائع</th>
+        <th>المشتري</th>
+        <th>الكمية</th>
+        <th>المبلغ</th>
+        <th>طريقة الدفع</th>
+        <th>تاريخ التنفيذ</th>
+        <th>طريقة التحرير</th>
+        <th>الإثبات</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Modal لعرض صورة الإثبات -->
+  <div id="proofModal" onclick="closeProofModal()">
+    <button class="close-btn" onclick="closeProofModal()">إغلاق ✕</button>
+    <img id="proofModalImg" src="" alt="Payment Proof"/>
+  </div>
+
+</body>
+</html>
